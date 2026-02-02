@@ -1,0 +1,30 @@
+# Web app & interface
+streamlit
+streamlit-plotly-events
+
+# Data manipulation
+pandas
+numpy
+
+# Visualisation
+matplotlib
+altair
+plotly
+
+# Dates et calendrier
+python-dateutil
+
+# Authentification
+authlib
+requests
+python-dotenv
+
+# PostgreSQL
+psycopg2-binary
+
+# Traitement fichiers
+openpyxl
+pillow
+
+# Divers
+uuid

@@ -1,0 +1,28 @@
+# 1. Image de base
+FROM python:3.10-slim
+
+# 2. Définir le dossier de travail
+WORKDIR /app
+
+# Installer les locales (nécessaire pour les langues autres que C/anglais)
+RUN apt-get update && apt-get install -y locales && \
+    sed -i '/fr_FR.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen fr_FR.UTF-8
+
+ENV LANG=fr_FR.UTF-8
+ENV LANGUAGE=fr_FR:fr
+ENV LC_ALL=fr_FR.UTF-8
+
+# 3. Copier les fichiers nécessaires
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY .streamlit/ .streamlit/
+
+COPY . . 
+
+# 4. Exposer le port Streamlit
+EXPOSE 8505
+
+# 5. Commande de démarrage
+CMD ["streamlit", "run", "App.py","--server.port=8505", "--server.address=0.0.0.0"]

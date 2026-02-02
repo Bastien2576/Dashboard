@@ -1,0 +1,20 @@
+[
+    {
+        "Date": "2025-06-25",
+        "Type": "Facturables",
+        "Dur\u00e9e (h)": 0.0,
+        "Mission": "",
+        "Client": "",
+        "Code": "",
+        "Commentaire": ""
+    },
+    {
+        "Date": "2025-06-25",
+        "Type": "Non facturables",
+        "Dur\u00e9e (h)": 0.0,
+        "Mission": "",
+        "Client": "N/A",
+        "Code": "",
+        "Commentaire": ""
+    }
+]
