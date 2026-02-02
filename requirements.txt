@@ -1,4 +1,4 @@
-streamlit
+streamlit>=1.42.0
 pandas
 numpy
 psycopg2-binary
@@ -8,3 +8,4 @@ matplotlib
 python-dotenv
 plotly
 openpyxl
+Authlib==1.6.5
