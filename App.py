@@ -14,7 +14,6 @@ load_dotenv()
 
 ADMIN_EMAILS = os.getenv("ADMIN_EMAILS", "")
 
-
 def login_screen():
     col1, col2, col3 = st.columns([2, 5, 2])
     with col2:
@@ -22,7 +21,6 @@ def login_screen():
         st.subheader("_Parsing feuilles de temps_", divider="grey")
         st.info("Connectez-vous avec votre compte Microsoft pour accéder à votre espace personnel")
         st.button("Se connecter avec Microsoft", on_click=st.login)
-
 
 def get_db_conn():
     return psycopg2.connect(
@@ -33,7 +31,9 @@ def get_db_conn():
         port=os.getenv("DB_PORT"),
     )
 
-if not st.user.is_logged_in:
+is_logged_in = getattr(st.user, "is_logged_in", False)
+
+if not is_logged_in:
     login_screen()
     st.stop()
 
@@ -152,6 +152,6 @@ st.sidebar.divider()
 if st.sidebar.button("Se déconnecter", icon=":material/logout:"):
     st.logout()
 
-if st.user.is_logged_in:
+if getattr(st.user, "is_logged_in", False):
     display_name = getattr(st.user, "name", None) or getattr(st.user, "email", None) or "inconnu"
     st.sidebar.success(f"Connecté(e) en tant que : {display_name} ({role})")
