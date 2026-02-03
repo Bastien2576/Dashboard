@@ -33,14 +33,10 @@ def get_db_conn():
         port=os.getenv("DB_PORT"),
     )
 
-
-# ---------- Garde-fou AUTH : si pas loggé, on stop TOUT ----------
 if not st.user.is_logged_in:
     login_screen()
     st.stop()
 
-
-# ---------- Session state (init propre) ----------
 st.session_state.setdefault("authenticated", True)
 st.session_state.setdefault("role", "user")
 st.session_state.setdefault("utilisateur_id", None)
@@ -49,11 +45,8 @@ email = (st.user.email or "").lower()
 st.session_state["role"] = "admin" if email in ADMIN_EMAILS else "user"
 role = st.session_state["role"]
 
-
-# ---------- DB + Profil utilisateur ----------
 conn = get_db_conn()
 try:
-    # Nom/prénom : selon ton tenant, name peut ne pas avoir d'espace → on sécurise
     full_name = (st.user.name or "").strip()
     if " " in full_name:
         prenom, nom = full_name.split(" ", 1)
@@ -110,8 +103,6 @@ try:
 finally:
     conn.close()
 
-
-# ---------- Navigation / Pages ----------
 respond_1 = st.Page(
     "pagesZ/Dépôt.py",
     title="Test dépôt Excel",
