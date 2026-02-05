@@ -36,7 +36,7 @@ cursor = conn.cursor()
 
 st.subheader("Tableau de bord", anchor=False)
 
-tab1, tab2, tab3 = st.tabs(['Statistiques globales', 'Statistiques par collaborateur', 'Liste pour tickets restaurant'])
+tab1, tab2 = st.tabs(['Statistiques globales', 'Statistiques par collaborateur'])
 
 with tab1:
 ##################################################################################
@@ -393,7 +393,7 @@ with tab1:
                     font-size: 18px;
                     font-weight: 500;
                 '>
-                    Suivi mensuel des heures non facturables
+                    Répartition des heures non facturables par service
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -595,45 +595,3 @@ with tab2:
             )
 
     st.divider()
-
-#####################################################################
-# LISTE TICKETS RESTAURANT
-#####################################################################
-
-with tab3:
-
-    st.subheader("🎫 Liste de distribution des tickets restaurant")
-
-    col1, _ = st.columns(2)
-    with col1:
-        mois = st.selectbox("Mois", ['Janvier', 'Février', 'Mars', 'Avril',
-                                     'Mai', 'Juin', 'Juillet', 'Août', 'Septembre',
-                                     'Octobre', 'Novembre', 'Décembre']
-                           )
-
-        cursor.execute("""
-        SELECT u.nom || ' ' || u.prenom AS Collaborateur, tr.tr_pris AS Tickets_souhaités
-        FROM tickets_resto tr
-        INNER JOIN utilisateurs u ON tr.utilisateur_id = u.id
-        WHERE tr.mois = %s
-        AND tr.annee = %s
-        ORDER BY Collaborateur
-        """, (mois, annee,)
-                      )
-        tr_result = cursor.fetchall()
-
-        df_tick = pd.DataFrame(tr_result, columns=["Collaborateur", "Tickets souhaités"])
-        st.dataframe(df_tick.reset_index(drop=True), use_container_width=True)
-
-        output = io.BytesIO()
-
-        df_tick.to_excel(output, index=False, engine='openpyxl')
-
-        output.seek(0)
-
-        st.download_button(
-            label="📥 Télécharger en XLS",
-            data=output,
-            file_name=f"TR_{Mois}_{annee}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
