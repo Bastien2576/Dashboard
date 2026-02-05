@@ -20,7 +20,7 @@ def login_screen():
         st.title("Tempno")
         st.subheader("_Parsing feuilles de temps_", divider="grey")
         st.info("Connectez-vous avec votre compte Microsoft pour accéder à votre espace personnel")
-        st.button("Se connecter avec Microsoft", on_click=st.login)
+        st.button("Se connecter avec Microsoft", on_click=st.login, kwargs={"provider": "microsoft"})
 
 def get_db_conn():
     return psycopg2.connect(
