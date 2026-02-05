@@ -46,62 +46,62 @@ st.session_state["role"] = "admin" if email in ADMIN_EMAILS else "user"
 role = st.session_state["role"]
 
 conn = get_db_conn()
-try:
-    full_name = (st.user.name or "").strip()
-    if " " in full_name:
-        prenom, nom = full_name.split(" ", 1)
-    else:
-        prenom, nom = full_name, ""
+# try:
+#     full_name = (st.user.name or "").strip()
+#     if " " in full_name:
+#         prenom, nom = full_name.split(" ", 1)
+#     else:
+#         prenom, nom = full_name, ""
 
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT id FROM utilisateurs WHERE mail = %s", (email,))
-        result = cursor.fetchone()
+#     with conn.cursor() as cursor:
+#         cursor.execute("SELECT id FROM utilisateurs WHERE mail = %s", (email,))
+#         result = cursor.fetchone()
 
-        if not result:
-            st.warning("Profil introuvable. Merci de compléter vos informations pour activer votre compte.")
+#         if not result:
+#             st.warning("Profil introuvable. Merci de compléter vos informations pour activer votre compte.")
 
-            with st.form("creation_profil"):
-                matricule = st.text_input("Code collaborateur", max_chars=3)
-                heures_hebdo = st.selectbox("Heures contractuelles hebdomadaires", ["35", "39", "42.25"])
-                nom_service = st.selectbox(
-                    "Nom de service",
-                    [
-                        "Audit", "Surveillance", "Tenue", "Social / Paie",
-                        "Secrétariat", "Expert comptable associé"
-                    ],
-                )
-                submitted = st.form_submit_button("Créer mon profil")
+#             with st.form("creation_profil"):
+#                 matricule = st.text_input("Code collaborateur", max_chars=3)
+#                 heures_hebdo = st.selectbox("Heures contractuelles hebdomadaires", ["35", "39", "42.25"])
+#                 nom_service = st.selectbox(
+#                     "Nom de service",
+#                     [
+#                         "Audit", "Surveillance", "Tenue", "Social / Paie",
+#                         "Secrétariat", "Expert comptable associé"
+#                     ],
+#                 )
+#                 submitted = st.form_submit_button("Créer mon profil")
 
-                if submitted:
-                    cursor.execute(
-                        """
-                        INSERT INTO utilisateurs (matricule, nom, prenom, nom_service, heures_hebdo, mail)
-                        VALUES (%s, %s, %s, %s, %s, %s)
-                        RETURNING id
-                        """,
-                        (matricule, nom, prenom, nom_service, heures_hebdo, email),
-                    )
-                    utilisateur_id = cursor.fetchone()[0]
-                    conn.commit()
+#                 if submitted:
+#                     cursor.execute(
+#                         """
+#                         INSERT INTO utilisateurs (matricule, nom, prenom, nom_service, heures_hebdo, mail)
+#                         VALUES (%s, %s, %s, %s, %s, %s)
+#                         RETURNING id
+#                         """,
+#                         (matricule, nom, prenom, nom_service, heures_hebdo, email),
+#                     )
+#                     utilisateur_id = cursor.fetchone()[0]
+#                     conn.commit()
 
-                    cursor.execute(
-                        """
-                        INSERT INTO taux_facturation (utilisateur_id, taux, date, nom, prenom)
-                        VALUES (%s, 0, NOW(), %s, %s)
-                        """,
-                        (utilisateur_id, nom, prenom),
-                    )
-                    conn.commit()
+#                     cursor.execute(
+#                         """
+#                         INSERT INTO taux_facturation (utilisateur_id, taux, date, nom, prenom)
+#                         VALUES (%s, 0, NOW(), %s, %s)
+#                         """,
+#                         (utilisateur_id, nom, prenom),
+#                     )
+#                     conn.commit()
 
-                    st.session_state["utilisateur_id"] = utilisateur_id
-                    st.success("Profil créé avec succès !")
-                    st.rerun()
+#                     st.session_state["utilisateur_id"] = utilisateur_id
+#                     st.success("Profil créé avec succès !")
+#                     st.rerun()
 
-            st.stop()
-        st.session_state["utilisateur_id"] = result[0]
+#             st.stop()
+#         st.session_state["utilisateur_id"] = result[0]
 
-finally:
-    conn.close()
+# finally:
+#     conn.close()
 
 respond_1 = st.Page(
     "pagesZ/Dépôt.py",
@@ -149,9 +149,9 @@ pg = st.navigation(page_dict)
 pg.run()
 
 st.sidebar.divider()
-if st.sidebar.button("Se déconnecter", icon=":material/logout:"):
-    st.logout()
+# if st.sidebar.button("Se déconnecter", icon=":material/logout:"):
+#     st.logout()
 
-if getattr(st.user, "is_logged_in", False):
-    display_name = getattr(st.user, "name", None) or getattr(st.user, "email", None) or "inconnu"
-    st.sidebar.success(f"Connecté(e) en tant que : {display_name} ({role})")
+# if getattr(st.user, "is_logged_in", False):
+#     display_name = getattr(st.user, "name", None) or getattr(st.user, "email", None) or "inconnu"
+#     st.sidebar.success(f"Connecté(e) en tant que : {display_name} ({role})")
