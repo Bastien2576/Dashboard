@@ -24,7 +24,7 @@ conn = psycopg2.connect(
 
 cursor = conn.cursor()
 
-user_id = st.session_state["utilisateur_id"]
+user_id = st.session_state["utilisateur_id"] or "6"
 
 tab1, tab2, tab3 = st.tabs(["🏢 Client", "📂 Dossier", "🛠️ Mission"])
 

@@ -36,7 +36,7 @@ cursor = conn.cursor()
 
 st.subheader("Tableau de bord", anchor=False)
 
-tab1, tab2 = st.tabs(['Statistiques globales', 'Statistiques par collaborateur'])
+tab1, tab2, tab3 = st.tabs(['Statistiques globales', 'Statistiques par collaborateur', 'Statistiques par client'])
 
 with tab1:
 ##################################################################################
@@ -322,7 +322,7 @@ with tab1:
                     font-size: 18px;
                     font-weight: 500;
                 '>
-                    Suivi mensuel des heures facturables
+                    Suivi annuel des heures facturables
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -595,3 +595,83 @@ with tab2:
             )
 
     st.divider()
+
+    def missions_collab(collab, conn, annee=annee, mois=mois_prec): #MODIFIER LES PARAMETRES : MOIS = MOIS (pas mois_prec)
+        query="""
+        SELECT hs.nom_du_client, SUM(hs.duree_heures) AS total_heures, u.nom || ' ' || u.prenom AS Nom
+        FROM heures_saisies hs
+        JOIN utilisateurs u ON hs.utilisateur_id = u.id
+        WHERE EXTRACT(YEAR FROM hs.date) = %s
+        AND EXTRACT(MONTH FROM hs.date) = %s
+        """
+
+        params = [annee, mois]
+
+        query += "GROUP BY hs.nom_du_client, u.nom, u.prenom ORDER BY total_heures DESC"
+
+        df = pd.read_sql(query, conn, params=params)
+        df = df.loc[df['nom'] == collab]
+        return df
+
+    df = missions_collab(collab, conn=conn)
+
+    st.markdown("""
+    <div style='text-decoration: underline;
+    font-size: 22px;
+    font-weight: 200;
+    '>Temps alloué à chaque client ce mois-ci</div>""",
+                unsafe_allow_html=True)
+
+    fig = px.bar(df,
+                 x='nom_du_client', y='total_heures')
+    st.plotly_chart(fig)
+
+with tab3:
+    query_client = """
+    SELECT nom_client
+    FROM clients
+    ORDER BY nom_client
+    """
+
+    df_client = pd.read_sql(query_client, conn)
+
+    cl_nom = st.selectbox("Nom du client", df_client)
+
+    def facturation_client(cl_nom, conn):
+        query="""
+        SELECT
+          tot.montant_calc,
+          tot.montant_fact,
+          tot.boni_mali,
+          f.mission
+        FROM facturation f
+        JOIN total_facturation tot ON tot.id_total = f.id_total
+        JOIN missions m ON m.id = f.id_mission
+        JOIN clients c ON c.id = f.id_client
+        WHERE c.nom_client = %s
+          AND m.statut = 'Clôturé'
+        """
+
+        df = pd.read_sql(query, conn, params=(cl_nom,))
+        return df
+        
+    df = facturation_client(cl_nom, conn=conn)
+    df = df.drop_duplicates(subset=['mission'])
+    df["couleur"] = df["boni_mali"].apply(lambda x: "Positif" if x >= 0 else "Négatif")
+
+    fig = px.bar(df,
+                 x='mission',
+                 y='boni_mali',
+                 color='couleur',
+                 color_discrete_map={
+                     'Positif': 'green',
+                     'Négatif': 'red'
+                 },
+                 title='Rendement par mission (Boni - Mali)',
+                 labels={'mission': 'Mission', 'boni_mali': 'Boni - Mali (€)'})
+    st.plotly_chart(fig)
+
+    st.divider()
+
+    with st.expander(f'Données de facturation : {cl_nom}'):
+        st.dataframe(df)

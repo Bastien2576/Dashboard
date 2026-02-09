@@ -128,58 +128,62 @@ with tab1 :
 ###############################################################################################
 with tab2 :
 
-    cola, _, colb = st.columns(3)
+    try:
+        cola, _, colb = st.columns(3)
+    
+        cursor.execute("""
+        SELECT DISTINCT id_total
+        FROM facturation
+        ORDER BY id_total
+        """)
+    
+        date_fact = cursor.fetchall()
+        date_fact = [row[0] for row in date_fact]
+    
+        with cola :
+            id_total = st.selectbox("Matricule de facture", date_fact, placeholder="Nom de mission + date de clôture")
+    
+            if id_total:
+                cursor.execute("""
+                    SELECT date, code, nom, tache, libelle, quantite, facture
+                    FROM facturation
+                    WHERE id_total = %s
+                    ORDER BY date
+                """, (id_total,))
+    
+                rows = cursor.fetchall()
+    
+                cols = [desc[0] for desc in cursor.description]
+                facturation = pd.DataFrame(rows, columns=cols)
+    
+            html_1 = facturation.to_html(index=False)
+    
+            config = pdfkit.configuration(wkhtmltopdf=r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe")
+    
+            html_content = f"""
+            <html>
+            <head>
+                <style>
+                    body {{ font-family: Arial; }}
+                    h2 {{ color: #333; }}
+                    table {{ border-collapse: collapse; width: 100%; margin-bottom: 40px; }}
+                    th, td {{ border: 1px solid #ccc; padding: 8px; text-align: left; }}
+                    th {{ background-color: #f2f2f2; }}
+                </style>
+            </head>
+            <body>
+                <h2>ETAT DE PREFACTURATION</h2>
+                {html_1}
+            </body>
+            </html>
+            """
+    
+            components.html(html_content, height=600, scrolling=True)
+    
+            télécharger_p1 = st.button("📥 Télécharger en pdf")
+    
+            if télécharger_p1 :
+                pdfkit.from_string(html_content, r"C:/Users/ubamiot/Scripts/Application_GI/test_facturation.pdf", configuration=config)
 
-    cursor.execute("""
-    SELECT DISTINCT id_total
-    FROM facturation
-    ORDER BY id_total
-    """)
-
-    date_fact = cursor.fetchall()
-    date_fact = [row[0] for row in date_fact]
-
-    with cola :
-        id_total = st.selectbox("Matricule de facture", date_fact, placeholder="Nom de mission + date de clôture")
-
-        if id_total :
-            cursor.execute("""
-                SELECT date, code, nom, tache, libelle, quantite, facture
-                FROM facturation
-                WHERE id_total = %s
-                ORDER BY date
-            """, (id_total,))
-
-            rows = cursor.fetchall()
-
-            cols = [desc[0] for desc in cursor.description]
-            facturation = pd.DataFrame(rows, columns=cols)
-
-        html_1 = facturation.to_html(index=False)
-
-        config = pdfkit.configuration(wkhtmltopdf=r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe")
-
-        html_content = f"""
-        <html>
-        <head>
-            <style>
-                body {{ font-family: Arial; }}
-                h2 {{ color: #333; }}
-                table {{ border-collapse: collapse; width: 100%; margin-bottom: 40px; }}
-                th, td {{ border: 1px solid #ccc; padding: 8px; text-align: left; }}
-                th {{ background-color: #f2f2f2; }}
-            </style>
-        </head>
-        <body>
-            <h2>ETAT DE PREFACTURATION</h2>
-            {html_1}
-        </body>
-        </html>
-        """
-
-        components.html(html_content, height=600, scrolling=True)
-
-        télécharger_p1 = st.button("📥 Télécharger en pdf")
-
-        if télécharger_p1 :
-            pdfkit.from_string(html_content, r"C:/Users/ubamiot/Scripts/Application_GI/test_facturation.pdf", configuration=config)
+    except:
+        st.warning("Pas de ligne de facturation")
