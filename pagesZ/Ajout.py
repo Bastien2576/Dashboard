@@ -218,7 +218,7 @@ with tab3 :
                     st.write(" ")
   
                 with colc:
-                    annee_f = st.selectbox("Année", ["2020", "2021", "2022", "2023", "2024", "2025"])
+                    annee_f = st.selectbox("Année", ["2020", "2021", "2022", "2023", "2024", "2025", "2026"])
 
                 with cold:
                     st.markdown("""

@@ -134,11 +134,17 @@ admin_4 = st.Page(
     icon=":material/contract:",
 )
 
+admin_5 = st.Page(
+    "pagesZ/Lettre Mission.py",
+    title="Générer une lettre de mission",
+    icon=":material/content_paste:",
+)
+
 st.logo("images/horizontal_blue.png", icon_image="images/secno_icon.png")
 
 page_dict = {}
 respond_pages = [respond_1]
-admin_pages = [admin_1, admin_2, admin_3, admin_4]
+admin_pages = [admin_1, admin_2, admin_3, admin_4, admin_5]
 
 if role in ["user", "admin"]:
     page_dict["Espace Collaborateur"] = respond_pages

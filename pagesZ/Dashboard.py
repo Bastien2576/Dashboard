@@ -615,15 +615,9 @@ with tab2:
 
     df = missions_collab(collab, conn=conn)
 
-    st.markdown("""
-    <div style='text-decoration: underline;
-    font-size: 22px;
-    font-weight: 200;
-    '>Temps alloué à chaque client ce mois-ci</div>""",
-                unsafe_allow_html=True)
-
     fig = px.bar(df,
-                 x='nom_du_client', y='total_heures')
+                 x='nom_du_client', y='total_heures',
+                title='Temps alloué à chaque client ce mois-ci')
     st.plotly_chart(fig)
 
 with tab3:
@@ -659,19 +653,45 @@ with tab3:
     df = df.drop_duplicates(subset=['mission'])
     df["couleur"] = df["boni_mali"].apply(lambda x: "Positif" if x >= 0 else "Négatif")
 
-    fig = px.bar(df,
-                 x='mission',
-                 y='boni_mali',
-                 color='couleur',
-                 color_discrete_map={
-                     'Positif': 'green',
-                     'Négatif': 'red'
-                 },
-                 title='Rendement par mission (Boni - Mali)',
-                 labels={'mission': 'Mission', 'boni_mali': 'Boni - Mali (€)'})
-    st.plotly_chart(fig)
+    col1, col2 = st.columns(2)
 
-    st.divider()
+    with col1:
+        with st.container(border=True):
+            fig = px.bar(df,
+                         x='mission',
+                         y='boni_mali',
+                         color='couleur',
+                         color_discrete_map={
+                             'Positif': 'green',
+                             'Négatif': 'red'
+                         },
+                         title='Rendement par mission (Boni - Mali)',
+                         labels={'mission': 'Mission', 'boni_mali': 'Boni - Mali (€)'})
+            fig.update_xaxes(tickangle=-45)
+            st.plotly_chart(fig)
+        
+            st.divider()
+        
+            with st.expander(f'Données de facturation : {cl_nom}'):
+                st.dataframe(df)
 
-    with st.expander(f'Données de facturation : {cl_nom}'):
-        st.dataframe(df)
+    def facturation_client(cl_nom, conn):
+        query="""
+        SELECT
+          tot.montant_calc,
+          tot.montant_fact,
+          tot.boni_mali,
+          f.mission
+        FROM facturation f
+        JOIN total_facturation tot ON tot.id_total = f.id_total
+        JOIN missions m ON m.id = f.id_mission
+        JOIN clients c ON c.id = f.id_client
+        WHERE c.nom_client = %s
+          AND m.statut = 'Clôturé'
+        """
+
+        df = pd.read_sql(query, conn, params=(cl_nom,))
+        return df
+        
+    df = facturation_client(cl_nom, conn=conn)
+    df = df.drop_duplicates(subset=['mission'])
